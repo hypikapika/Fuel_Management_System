@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/fuel_login_page.html" }
+  ]
+}
