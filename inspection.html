@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspection Checklist - Fuel Blending Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+</head>
+
+<body class="inspection-body">
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-gas-pump"></i>
+                <span>Fuel Blending MS</span>
+            </div>
+            <div class="user-profile">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-info">
+                    <span id="userDisplay">Inspector</span>
+                    <small>Operator</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-view="dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link" data-view="inspection">
+                    <i class="fa-solid fa-clipboard-check"></i> Tank Trailer Inspection
+                </a>
+                <a href="#" class="nav-link" data-view="management">
+                    <i class="fa-solid fa-table-list"></i> Data Management
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn-sidebar"><i class="fa-solid fa-sign-out-alt"></i>
+                    Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content-area">
+            <!-- Top Navigation Bar -->
+            <nav class="top-navbar">
+                <div class="top-nav-links">
+                    <a href="#" class="top-nav-link active" data-view="dashboard">Dashboard</a>
+                    <a href="#" class="top-nav-link" data-view="inspection">Tank Trailer Inspection</a>
+                    <a href="#" class="top-nav-link" data-view="management">Data Management</a>
+                </div>
+                <div class="top-nav-user">
+                    <span id="topUserDisplay">Inspector</span>
+                </div>
+            </nav>
+
+            <header class="top-header">
+                <h2 id="pageTitle">Dashboard</h2>
+                <div class="date-display" id="currentDate">Loading date...</div>
+            </header>
+
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="view-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-truck"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Inspections</h3>
+                            <p id="statTotal">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Approved</h3>
+                            <p id="statApproved">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fa-solid fa-times-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Rejected</h3>
+                            <p id="statRejected">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Inspection Status Overview</h3>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Daily Inspections (Last 7 Days)</h3>
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                    <div class="chart-card" style="grid-column: 1 / -1;">
+                        <h3>Units Loaded (Last 24 Hours)</h3>
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: INSPECTION FORM -->
+            <div id="view-inspection" class="view-section" style="display: none;">
+                <form id="inspectionForm">
+                    <!-- Vehicle Information -->
+                    <section class="inspection-section">
+                        <h3 class="section-title">Vehicle & Delivery Information</h3>
+                        <div class="grid-container">
+                            <div class="form-group">
+                                <label>Truck ID / Plate Number</label>
+                                <input type="text" name="truckId" required placeholder="e.g., B 1234 XX">
+                            </div>
+                            <div class="form-group">
+                                <label>Trailer ID</label>
+                                <input type="text" name="trailerId" required placeholder="e.g., T-001">
+                            </div>
+                            <div class="form-group">
+                                <label>Transporter Company</label>
+                                <input type="text" name="transporter" required placeholder="Company Name">
+                            </div>
+                            <div class="form-group">
+                                <label>Driver Name</label>
+                                <input type="text" name="driverName" required placeholder="Full Name">
+                            </div>
+                            <!-- New Fields -->
+                            <div class="form-group">
+                                <label>Destination / Delivery To</label>
+                                <input type="text" name="destination" required placeholder="Customer / Location">
+                            </div>
+                            <div class="form-group">
+                                <label>Tank Capacity (Liters)</label>
+                                <input type="text" name="capacity" required placeholder="e.g., 24000">
+                            </div>
+                            <div class="form-group">
+                                <label>Loading Point</label>
+                                <input type="number" name="loadingPoint" required placeholder="e.g., 1">
+                            </div>
+                        </div>
+                        <div class="grid-container" style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label>Time In</label>
+                                <input type="datetime-local" name="timeIn" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Time Out</label>
+                                <input type="datetime-local" name="timeOut">
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Safety Check -->
+                    <section class="inspection-section">
+                        <h3 class="section-title">1. Safety Equipment Check</h3>
+                        <div class="checklist-grid">
+                            <div class="check-item">
+                                <span class="check-label">Fire Extinguisher (APAR)</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check1" name="check_apar">
+                                    <label for="check1"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Safety Cone / Triangle</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check2" name="check_cone">
+                                    <label for="check2"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Spill Kit Availability</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check3" name="check_spillkit">
+                                    <label for="check3"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Driver PPE (Helmet, Shoes, Vest)</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check4" name="check_ppe">
+                                    <label for="check4"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Mechanical Check -->
+                    <section class="inspection-section">
+                        <h3 class="section-title">2. Mechanical & Tank Condition</h3>
+                        <div class="checklist-grid">
+                            <div class="check-item">
+                                <span class="check-label">Tire Condition (No bald tires)</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check5" name="check_tires">
+                                    <label for="check5"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Lights (Brake, Turn, Reverse)</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check6" name="check_lights">
+                                    <label for="check6"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Tank Leakage Check</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check7" name="check_leak">
+                                    <label for="check7"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Bottom Valve Sealed</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check8" name="check_valve">
+                                    <label for="check8"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Grounding Cable Condition</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check9" name="check_grounding">
+                                    <label for="check9"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Documentation Check -->
+                    <section class="inspection-section">
+                        <h3 class="section-title">3. Documentation</h3>
+                        <div class="checklist-grid">
+                            <div class="check-item">
+                                <span class="check-label">Valid Driver's License (SIM B2)</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check10" name="check_sim">
+                                    <label for="check10"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">KIR / Vehicle Inspection Cert</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check11" name="check_kir">
+                                    <label for="check11"></label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <span class="check-label">Tera Metrology Certificate</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="check12" name="check_tera">
+                                    <label for="check12"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Remarks -->
+                    <section class="inspection-section">
+                        <h3 class="section-title">Remarks & Observations</h3>
+                        <div class="grid-container">
+                            <div class="form-group">
+                                <label>Seal Remarks (Number/Condition)</label>
+                                <textarea name="sealRemarks" rows="3"
+                                    placeholder="Enter seal numbers and condition..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Sounding / Tera Remarks</label>
+                                <textarea name="teraRemarks" rows="3"
+                                    placeholder="Enter liquid level / tera details..."></textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Note (Unit Details)</label>
+                                <textarea name="note" rows="3"
+                                    placeholder="Enter additional notes for the unit..."></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="action-buttons">
+                        <button type="button" id="rejectBtn" class="btn btn-reject">REJECT UNIT</button>
+                        <button type="button" id="submitAddBtn" class="btn btn-submit-add"
+                            style="background: #3498db; color: white;">SUBMIT & ADD NEW</button>
+                        <button type="submit" id="approveBtn" class="btn btn-approve">APPROVE UNIT</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- VIEW: DATA MANAGEMENT -->
+            <div id="view-management" class="view-section" style="display: none;">
+                <div class="management-controls">
+                    <button id="exportBtn" class="btn btn-export"><i class="fa-solid fa-file-excel"></i> Export to
+                        Excel</button>
+                    <button id="clearDataBtn" class="btn btn-reject"
+                        style="font-size: 0.9rem; padding: 10px 20px;">Clear All Data</button>
+                </div>
+                <div class="table-container">
+                    <table id="inspectionTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Truck ID</th>
+                                <th>Driver</th>
+                                <th>Transporter</th>
+                                <th>Destination</th>
+                                <th>Note</th>
+                                <th>Status</th>
+                                <th>Inspector</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon"></div>
+            <h2 id="modalTitle">Title</h2>
+            <p id="modalMessage">Message</p>
+            <button id="modalCloseBtn" class="btn">Close</button>
+        </div>
+    </div>
+
+    <script src="js/inspection.js"></script>
+</body>
+
+</html>
